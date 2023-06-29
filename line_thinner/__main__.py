@@ -17,10 +17,12 @@ DEFAULT_USE_WEIGHTED_TOLERANCE = False
 DEFAULT_MAX_DISTANCE_FOR_WEIGHTING = 0.01
 DEFAULT_ANGLE_FOR_WEIGHTING = 15
 
-
-config_file = os.path.join(os.path.dirname(__file__), 'config.json')
-with open(config_file, 'r') as fi:
-    config_data = json.load(fi)
+config_file = 'config.json'
+if os.path.isfile(config_file):
+    with open('config.json', 'r') as fi:
+        config_data = json.load(fi)
+else:
+    config_data = {}
 
 
 def worker(option):
