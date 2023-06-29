@@ -4,19 +4,8 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 
 from core.txt_file.write_txt_file import txt_list_writer
-from core.txt_file.logic import get_feature_name, get_node
 from multipolygon_fixer.merge_rings import process_feature_nodes
 from core.txt_file.read_txt_file import read_txt_file
-
-
-# with txt_list_writer(option["output_file"]) as (tsv_writer, last_index):
-#     # write_row = []
-#     # write_row.append(last_index + i + 1)
-#     # write_row.append(lon)
-#     # write_row.append(lat)
-#     # write_row.append(corrected_alt)
-#     # write_row.append(name)
-#     # tsv_writer.writerow(write_row)
 
 
 def worker(option):
