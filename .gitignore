@@ -170,6 +170,8 @@ poetry.toml
 # ruff
 .ruff_cache/
 
+tests/data/TouristAreas_mutlipolygon_fixed.txt
+
 # LSP config files
 pyrightconfig.json
 

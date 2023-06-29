@@ -1,8 +1,6 @@
-from contextlib import contextmanager
 from core.txt_file.logic import check_file_is_non_empty_txt_file, get_feature_name, get_node
 
 
-@contextmanager
 def read_txt_file(filepath):
     check_file_is_non_empty_txt_file(filepath)
 
