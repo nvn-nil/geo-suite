@@ -1,0 +1,6 @@
+{
+    "allowed_angle_deviation": 1,
+    "use_weighted_tolerance": false,
+    "max_distance_for_weighting": 0.01,
+    "max_angle_for_weighting": 15
+}

@@ -94,3 +94,7 @@ def dedupe_nodes(nodes):
             continue
         result.append(nodes[i])
     return result
+
+
+def get_node_name(node):
+    return node["name"] + ("-" + node['sub_name'] if node['sub_name'] else "")
