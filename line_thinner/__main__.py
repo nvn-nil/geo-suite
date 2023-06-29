@@ -9,6 +9,7 @@ from core.txt_file.write_txt_file import txt_list_writer
 from core.txt_file.read_txt_file import read_txt_file
 from line_thinner.line_thinner import reduce_points_in_a_line
 from core.txt_file.logic import get_node_name
+from core.utilities import file_handler
 
 
 DEFAULT_ALLOWED_ANGLE_DEVIATION = 1
@@ -23,32 +24,34 @@ with open(config_file, 'r') as fi:
 
 
 def worker(option):
-    counter = 0
-    for this_feature_nodes in read_txt_file(option["input_file"]):
-        feature_node_named_groups = defaultdict(list)
-        for node in this_feature_nodes:
-            name = get_node_name(node)
-            feature_node_named_groups[name].append(node)
+    with file_handler(option["output_file"], replace=option["replace"]) as filepath:
+        counter = 0
+        for this_feature_nodes in read_txt_file(option["input_file"]):
+            feature_node_named_groups = defaultdict(list)
 
-        for nodes in feature_node_named_groups.values():
-            group_name = nodes[0]["name"] + ("-" + nodes[0]['sub_name'] if nodes[0]['sub_name'] else "")
-            
-            lon_lat_alt_coordinates = list(map(lambda x: [x['longitude'], x['latitude'], x['altitude']], nodes))
-            reduced_coordinates = reduce_points_in_a_line(lon_lat_alt_coordinates, **option['thinning_options'])
-            
-            with txt_list_writer(option["output_file"]) as (tsv_writer, last_index):
-                current_write_counter = 0
-                for coordinate in reduced_coordinates:
-                    row = []
-                    row.append(last_index + current_write_counter + 1)
-                    row.append(coordinate[0])
-                    row.append(coordinate[1])
-                    row.append(coordinate[2])
-                    row.append(group_name)
-                    tsv_writer.writerow(row)
-                    
-                    counter += 1
-                    current_write_counter += 1
+            for node in this_feature_nodes:
+                name = get_node_name(node)
+                feature_node_named_groups[name].append(node)
+
+            for nodes in feature_node_named_groups.values():
+                group_name = nodes[0]["name"] + ("-" + nodes[0]['sub_name'] if nodes[0]['sub_name'] else "")
+                
+                lon_lat_alt_coordinates = list(map(lambda x: [x['longitude'], x['latitude'], x['altitude']], nodes))
+                reduced_coordinates = reduce_points_in_a_line(lon_lat_alt_coordinates, **option['thinning_options'])
+
+                with txt_list_writer(filepath) as (tsv_writer, last_index):
+                    current_write_counter = 0
+                    for coordinate in reduced_coordinates:
+                        row = []
+                        row.append(last_index + current_write_counter + 1)
+                        row.append(coordinate[0])
+                        row.append(coordinate[1])
+                        row.append(coordinate[2])
+                        row.append(group_name)
+                        tsv_writer.writerow(row)
+                        
+                        counter += 1
+                        current_write_counter += 1
 
     return counter
 

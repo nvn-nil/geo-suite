@@ -6,26 +6,28 @@ from concurrent.futures import ThreadPoolExecutor
 from core.txt_file.write_txt_file import txt_list_writer
 from multipolygon_fixer.merge_rings import process_feature_nodes
 from core.txt_file.read_txt_file import read_txt_file
+from core.utilities import file_handler
 
 
 def worker(option):
-    counter = 0
-    for this_feature_nodes in read_txt_file(option["input_file"]):
-        completed_rings, incomplete_groups = process_feature_nodes(this_feature_nodes)
-        with txt_list_writer(option["output_file"]) as (tsv_writer, last_index):
-            current_write_counter = 0
-            for nodes in completed_rings + incomplete_groups:
-                for node in nodes:
-                    row = []
-                    row.append(last_index + current_write_counter + 1)
-                    row.append(node['longitude'])
-                    row.append(node['latitude'])
-                    row.append(node['altitude'])
-                    row.append(node['name'] + ('-' + node['sub_name'] if node['sub_name'] else ''))
-                    tsv_writer.writerow(row)
-                    
-                    counter += 1
-                    current_write_counter += 1
+    with file_handler(option["output_file"], replace=option["replace"]) as filepath:
+        counter = 0
+        for this_feature_nodes in read_txt_file(option["input_file"]):
+            completed_rings, incomplete_groups = process_feature_nodes(this_feature_nodes)
+            with txt_list_writer(filepath) as (tsv_writer, last_index):
+                current_write_counter = 0
+                for nodes in completed_rings + incomplete_groups:
+                    for node in nodes:
+                        row = []
+                        row.append(last_index + current_write_counter + 1)
+                        row.append(node['longitude'])
+                        row.append(node['latitude'])
+                        row.append(node['altitude'])
+                        row.append(node['name'] + ('-' + node['sub_name'] if node['sub_name'] else ''))
+                        tsv_writer.writerow(row)
+                        
+                        counter += 1
+                        current_write_counter += 1
 
     return counter
 
