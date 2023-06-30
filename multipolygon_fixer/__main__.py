@@ -17,7 +17,7 @@ def worker(option):
             with txt_list_writer(filepath) as (tsv_writer, last_index):
                 current_write_counter = 0
                 for nodes in completed_rings:
-                    name = nodes[0]['sub_name']
+                    name = nodes[0]['sub_name'] if nodes[0]['sub_name'] else nodes[0]['name']
                     for node in nodes:
                         row = []
                         row.append(last_index + current_write_counter + 1)
@@ -31,7 +31,7 @@ def worker(option):
                         current_write_counter += 1
                 
                 for nodes in incomplete_groups:
-                    name = nodes[0]['name'] + "-" + nodes[0]['sub_name']
+                    name = nodes[0]['name'] + ("-" + nodes[0]['sub_name'] if nodes[0]['sub_name'] else "")
                     for node in nodes:
                         row = []
                         row.append(last_index + current_write_counter + 1)
