@@ -16,14 +16,29 @@ def worker(option):
             completed_rings, incomplete_groups = process_feature_nodes(this_feature_nodes)
             with txt_list_writer(filepath) as (tsv_writer, last_index):
                 current_write_counter = 0
-                for nodes in completed_rings + incomplete_groups:
+                for nodes in completed_rings:
+                    name = nodes[0]['sub_name']
                     for node in nodes:
                         row = []
                         row.append(last_index + current_write_counter + 1)
                         row.append(node['longitude'])
                         row.append(node['latitude'])
                         row.append(node['altitude'])
-                        row.append(node['name'] + ('-' + node['sub_name'] if node['sub_name'] else ''))
+                        row.append(name)
+                        tsv_writer.writerow(row)
+                        
+                        counter += 1
+                        current_write_counter += 1
+                
+                for nodes in incomplete_groups:
+                    name = nodes[0]['name'] + "-" + nodes[0]['sub_name']
+                    for node in nodes:
+                        row = []
+                        row.append(last_index + current_write_counter + 1)
+                        row.append(node['longitude'])
+                        row.append(node['latitude'])
+                        row.append(node['altitude'])
+                        row.append(name)
                         tsv_writer.writerow(row)
                         
                         counter += 1

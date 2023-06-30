@@ -2,7 +2,7 @@
 name = "pipeliner"
 version = "0.1.0"
 description = ""
-authors = ["Naveen Anil <naveen.anil@wind-pioneers.com>"]
+authors = ["Naveen Anil <naveenms01@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
