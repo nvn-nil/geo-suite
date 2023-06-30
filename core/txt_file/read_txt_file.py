@@ -31,3 +31,5 @@ def read_txt_file(filepath):
                 this_feature_nodes = [get_node(line_items)]
             else:
                 this_feature_nodes.append(get_node(line_items))
+
+        yield this_feature_nodes
