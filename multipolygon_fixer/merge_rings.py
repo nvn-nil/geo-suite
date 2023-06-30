@@ -10,6 +10,8 @@ def process_feature_nodes(feature_nodes):
     
     if feature_nodes[0]["sub_name"] is None:
         return [[], [feature_nodes]]
+    elif is_ring_closed(feature_nodes):
+        return [[feature_nodes], []]
     else:
         rings = defaultdict(list)
         for node in feature_nodes:
