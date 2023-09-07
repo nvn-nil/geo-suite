@@ -9,6 +9,10 @@ from core.txt_file.read_txt_file import read_txt_file
 from core.utilities import file_handler
 
 
+def get_txt_row(index, longitude, latitude, altitude, name):
+    return [index, longitude, latitude, altitude, name]
+
+
 def worker(option):
     with file_handler(option["output_file"], replace=option["replace"]) as filepath:
         counter = 0
@@ -16,15 +20,11 @@ def worker(option):
             completed_rings, incomplete_groups = process_feature_nodes(this_feature_nodes)
             with txt_list_writer(filepath) as (tsv_writer, last_index):
                 current_write_counter = 0
+                this_index = last_index + current_write_counter + 1
                 for nodes in completed_rings:
                     name = nodes[0]['sub_name'] if nodes[0]['sub_name'] else nodes[0]['name']
                     for node in nodes:
-                        row = []
-                        row.append(last_index + current_write_counter + 1)
-                        row.append(node['longitude'])
-                        row.append(node['latitude'])
-                        row.append(node['altitude'])
-                        row.append(name)
+                        row = get_txt_row(this_index, node['longitude'], node['latitude'], node['altitude'], name)
                         tsv_writer.writerow(row)
                         
                         counter += 1
@@ -33,12 +33,7 @@ def worker(option):
                 for nodes in incomplete_groups:
                     name = nodes[0]['name'] + ("-" + nodes[0]['sub_name'] if nodes[0]['sub_name'] else "")
                     for node in nodes:
-                        row = []
-                        row.append(last_index + current_write_counter + 1)
-                        row.append(node['longitude'])
-                        row.append(node['latitude'])
-                        row.append(node['altitude'])
-                        row.append(name)
+                        row = get_txt_row(this_index, node['longitude'], node['latitude'], node['altitude'], name)
                         tsv_writer.writerow(row)
                         
                         counter += 1
@@ -92,7 +87,7 @@ def main():
             for item in folder_items:
                 filepath = os.path.join(input_item, item)
                 if os.path.isfile(filepath) and filepath.endswith('.txt'):
-                    options.append(filepath)
+                    options.append(get_file_options(filepath, args))
 
     # Set up multithreading
     number_of_threads = 10

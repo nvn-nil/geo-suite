@@ -120,7 +120,7 @@ def main():
             for item in folder_items:
                 filepath = os.path.join(input_item, item)
                 if os.path.isfile(filepath) and filepath.endswith('.txt'):
-                    options.append(filepath)
+                    options.append(get_file_options(filepath, args))
 
     # Set up multithreading
     number_of_threads = 10
