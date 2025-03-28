@@ -1,15 +1,16 @@
 [tool.poetry]
 name = "geo-suite"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Naveen Anil <naveenms01@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
+numpy = "^1.26.2"
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^3.4.0"
 pyinstaller = "^5.13.0"
+pre-commit = "^4.2.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

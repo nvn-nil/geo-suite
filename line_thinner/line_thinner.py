@@ -1,4 +1,81 @@
 import math
+from math import pi, sin
+
+import numpy as np
+
+WGS84_RADIUS = 6378137
+
+
+def rad(value):
+    return value * pi / 180
+
+
+def ring__area(coordinates):
+    """
+    Calculate the approximate _area of the polygon were it projected onto
+        the earth.  Note that this _area will be positive if ring is oriented
+        clockwise, otherwise it will be negative.
+
+    Reference:
+        Robert. G. Chamberlain and William H. Duquette, "Some Algorithms for
+        Polygons on a Sphere", JPL Publication 07-03, Jet Propulsion
+        Laboratory, Pasadena, CA, June 2007 http://trs-new.jpl.nasa.gov/dspace/handle/2014/40409
+
+    @Returns
+
+    {float} The approximate signed geodesic _area of the polygon in square meters.
+    """
+
+    assert isinstance(coordinates, (list, tuple))
+
+    _area = 0
+    coordinates_length = len(coordinates)
+
+    if coordinates_length > 2:
+        for i in range(0, coordinates_length):
+            if i == (coordinates_length - 2):
+                lower_index = coordinates_length - 2
+                middle_index = coordinates_length - 1
+                upper_index = 0
+            elif i == (coordinates_length - 1):
+                lower_index = coordinates_length - 1
+                middle_index = 0
+                upper_index = 1
+            else:
+                lower_index = i
+                middle_index = i + 1
+                upper_index = i + 2
+
+            p1 = coordinates[lower_index]
+            p2 = coordinates[middle_index]
+            p3 = coordinates[upper_index]
+
+            _area += (rad(p3[0]) - rad(p1[0])) * sin(rad(p2[1]))
+
+        _area = _area * WGS84_RADIUS * WGS84_RADIUS / 2
+
+    return _area
+
+
+def polygon__area(coordinates):
+
+    assert isinstance(coordinates, (list, tuple))
+
+    _area = 0
+    if len(coordinates) > 0:
+        _area += abs(ring__area(coordinates))
+
+    return _area
+
+
+def reduce_small_areas_to_points(coordinates, threshold_area_in_meter_square=150):
+    area = polygon__area(coordinates)
+
+    if area <= threshold_area_in_meter_square:
+        simple_centroid = np.mean(coordinates, axis=0).tolist()
+        return [simple_centroid]
+
+    return coordinates
 
 
 def reduce_points_in_a_line(
@@ -7,6 +84,9 @@ def reduce_points_in_a_line(
     use_weighted_tolerance=False,
     max_distance_for_weighting=0.05,
     max_angle_for_weighting=25,
+    reduce_area_to_point=False,
+    threshold_area_in_meter_square=100,
+    **kwargs
 ):
     """Given a list of coordinates remove redundant points in a line
 
@@ -14,47 +94,57 @@ def reduce_points_in_a_line(
 
     :param coordinates: list of coordinates
     :type coordinates: list
-    :param allowed_angle_deviation: allowed max deviation of a point from the line drawn by the 2 previous points to still be considered straight
+    :param allowed_angle_deviation: allowed max deviation of a point from the line drawn by the 2
+        previous points to still be considered straight
     :type allowed_angle_deviation: Optional[float]
     """
-    prev_coordinate = None
-    current_coordinate = None
-    next_coordinate = None
-    thinning_approach = (
-        constant_angle_deviation_check if not use_weighted_tolerance else length_weighted_angle_deviation_check
-    )
-    thinning_function_kwargs = (
-        {}
-        if not use_weighted_tolerance
-        else {"max_distance_for_weighting": max_distance_for_weighting, "max_angle": max_angle_for_weighting}
-    )
+    if reduce_area_to_point and len(coordinates) >= 3:
+        coordinates = reduce_small_areas_to_points(
+            coordinates, threshold_area_in_meter_square=threshold_area_in_meter_square
+        )
 
-    reduced_coordinates = []
+    if len(coordinates) >= 3:
 
-    for i in range(len(coordinates)):
-        current_coordinate = coordinates[i]
+        prev_coordinate = None
+        current_coordinate = None
+        next_coordinate = None
+        thinning_approach = (
+            constant_angle_deviation_check if not use_weighted_tolerance else length_weighted_angle_deviation_check
+        )
+        thinning_function_kwargs = (
+            {}
+            if not use_weighted_tolerance
+            else {"max_distance_for_weighting": max_distance_for_weighting, "max_angle": max_angle_for_weighting}
+        )
 
-        if i == 0 or i == len(coordinates) - 1:
-            reduced_coordinates.append(current_coordinate)
-            continue
+        reduced_coordinates = []
 
-        if i > 0 and prev_coordinate is None:
-            prev_coordinate = coordinates[i - 1]
+        for i in range(len(coordinates)):
+            current_coordinate = coordinates[i]
 
-        if i < len(coordinates) - 1:
-            next_coordinate = coordinates[i + 1]
+            if i == 0 or i == len(coordinates) - 1:
+                reduced_coordinates.append(current_coordinate)
+                continue
 
-        if thinning_approach(
-            prev_coordinate,
-            current_coordinate,
-            next_coordinate,
-            allowed_angle_deviation=allowed_angle_deviation,
-            **thinning_function_kwargs,
-        ):
-            reduced_coordinates.append(current_coordinate)
-            prev_coordinate = None
+            if i > 0 and prev_coordinate is None:
+                prev_coordinate = coordinates[i - 1]
 
-    return reduced_coordinates
+            if i < len(coordinates) - 1:
+                next_coordinate = coordinates[i + 1]
+
+            if thinning_approach(
+                prev_coordinate,
+                current_coordinate,
+                next_coordinate,
+                allowed_angle_deviation=allowed_angle_deviation,
+                **thinning_function_kwargs,
+            ):
+                reduced_coordinates.append(current_coordinate)
+                prev_coordinate = None
+
+        return reduced_coordinates
+
+    return coordinates
 
 
 def constant_angle_deviation_check(
@@ -126,7 +216,8 @@ def angle_between_3_points(point_a, point_b, point_c, round_to=5):
     denominator = 2 * distance_a_b * distance_b_c
 
     if denominator == 0:
-        # Happens when there are duplicate points, we'll consider the angle between them is 180 i.e. on the straight line
+        # Happens when there are duplicate points, we'll consider the
+        # angle between them is 180 i.e. on the straight line
         # So they get removed in the thinning process
         return 180
 

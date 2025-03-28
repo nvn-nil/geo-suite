@@ -26,7 +26,7 @@ def write_polygon(nodes, fp):
     coordinates = get_nodes_as_kml_coordinates(nodes)
     placemark = f"""\n
     <Placemark>
-        <name>{nodes["name"] + ("-" + nodes["sub_name"] if nodes["sub_name"] else "")}</name>
+        <name>{nodes[0]["name"] + ("-" + nodes[0]["sub_name"] if nodes[0]["sub_name"] else "")}</name>
         <Polygon>
             <altitudeMode>clampToGround</altitudeMode>
             <outerBoundaryIs>
@@ -83,10 +83,8 @@ def write_point(node, fp):
     placemark = f"""\n
     <Placemark>
         <name>{name}</name>
-        <LinearRing>
-            <extrude>1</extrude>
-            <tessellate>1</tessellate>
+        <Point>
             <coordinates>{coordinate}</coordinates>
-        </LinearRing>
+        </Point>
     </Placemark>\n"""
     fp.write(placemark)

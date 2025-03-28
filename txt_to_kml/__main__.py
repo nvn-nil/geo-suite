@@ -42,7 +42,7 @@ def get_file_options(input_item, args):
 
 
 def main():
-    parser = argparse.ArgumentParser("Multipolygon fixer")
+    parser = argparse.ArgumentParser("TXT to KML")
     parser.add_argument(
         "-i",
         "--inputs",
