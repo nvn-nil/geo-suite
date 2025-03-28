@@ -29,12 +29,12 @@ repos:
     hooks:
       - id: check-json5
 
-  - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.1.10
-    hooks:
-      - id: remove-crlf
-      - id: remove-tabs
-        files: '.*\.py'
+  # - repo: https://github.com/Lucas-C/pre-commit-hooks
+  #   rev: v1.1.10
+  #   hooks:
+  #     - id: remove-crlf
+  #     - id: remove-tabs
+  #       files: '.*\.py'
 
   - repo: https://github.com/pycqa/isort
     rev: 5.11.5
